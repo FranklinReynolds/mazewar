@@ -1,0 +1,49 @@
+Programming Journey
+
+I first heard of the computer game MazeWar in the early 80s. It was an early (maybe the first), first person shooter. I have never been a huge fan of computer games but over the years I have played several. MazeWar was interesting to me because it could be played on an ascii terminal like a VT100. I am just going to assume everyone knows what a VT100 was.
+
+MazeWar is a relatively simple, multi-player game. Players wander around a maze and shoot at monsters and other players. You get points for shooting players or monsters and you lose points for being shoot.
+
+I remember being pretty annoyed when I discovered the sys admin who was running things mentioned that he had arranged a "cheat" in which new players always entered the maze in front of the sys admin and with their back turned. This allowed the sys admin to get in several free shots.
+
+Anyway, years later when my kids were just old enough to start playing computer game (sometime in the 90s), I implemented my version of MazeWar, just for fun. The kids enjoyed playing the game (mostly cuz their Dad made it) for a day or two. I had a version that used curses (curses was a ascii terminal library - again, you are probably too young to know about this sort of thing) to render the maze and another version that used simple line art.
+
+Since then, I have often thought MazeWar would be a great way to experiment with new ideas and technologies. But I never got around to doing anything. Then I retired, then the novel Coronavirus struck. Suddenly I found myself with lots of time to scratch that MazeWar itch.
+
+First, I needed a working MazeWar game. My previous versions are long gone but how hard could it be to create a new version? Besides, this way I could use Python or some other modern programming language. I could also build it using a client/server model to make some of planned UI experiments easier.
+
+First Version
+
+I had been using Python for most of my programming projects for the last 5 or 6 years so I decided to use Python. I thought about picking a new language like Rust or an old language like Lisp. But eventually I decided to use Python for the first version. I figured I could experiment with different implementation languages in the future.
+
+I think Python's current popularity is interesting. 10 years ago there was quite a bit comparison between Python and Ruby. I used Ruby for about a year and it was probably the most pleasant to use programming language I have ever tried. However, even then it seemed to me that Ruby was not enjoying the widespread adoption of Python. Certainly that proved to be true in my personal experience.
+
+Even though I once preferred Ruby, I am now very comfortable with Python. It is a reasonable language with decent documentation and wonderful libraries. On the other hand, I really don't like a few things about Python:
+  - indentation to indicate code blocks (terrible choice responsible for more bugs than anything else I can think of)
+  - crippled lambdas (Ruby blocks are dramatically better)
+  - GIL (global interpreter lock)
+However, none of these problems are so severe I avoid using Python (though sometimes when I run into the lastest indentation bug ...).
+
+================================================
+l == wall and c != wall   # center hallway
+  draw diag wall
+  if prev l != wall       # just passed an intersection
+     draw prev l ending edge
+
+l == wall and c == wall and prev l != wall
+  draw short horizontal wall   # intersecting hallway & maybe face against wall
+
+l != wall and c == wall and prev l != wall # weird parallel hallway
+  draw short diag wall
+  
+
+l != wall and c != wall            # intersection from left
+  draw short horizontal wall;
+  if prev l == wall
+     draw prev l ending edge
+
+c == wall
+  draw center box
+
+c == other player or monster
+  draw it
