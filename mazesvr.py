@@ -27,11 +27,11 @@ class mazesvr:
     def __init__(self):
         random.seed()
         
-        for i in range(1, self.NumOfPlayers):
+        for i in range(0, self.NumOfPlayers+1):
             self.thing.append( THING.Thing(1, 1, self.m.PLAYER, "Player"+str(i), "", 1, i) )
             self.m.halls[1][1] = 1
         self.LASTPLAYER = self.NumOfPlayers
-        count = self.NumOfPlayers
+        count = self.NumOfPlayers + 1
         self.thing.append(THING.Thing(1, 5, self.m.GREMLIN, "Gremlin 1", "", 1, count))
         self.m.halls[1][5] = count;
         count += 1
@@ -104,22 +104,26 @@ class mazesvr:
                 self.m.halls[self.thing[player].x][self.thing[player].y + 1] = player 
                 self.m.halls[self.thing[player].x][self.thing[player].y] = 0 
                 self.thing[player].y += 1
+                return
         if self.thing[player].direction == 2:
             if self.m.halls[self.thing[player].x +1][self.thing[player].y] == 0 :
                 self.m.halls[self.thing[player].x + 1][self.thing[player].y] = player 
                 self.m.halls[self.thing[player].x][self.thing[player].y] = 0 
                 self.thing[player].x += 1
+                return
         if self.thing[player].direction == 3:
             if self.m.halls[self.thing[player].x][self.thing[player].y - 1] == 0 :
                 self.m.halls[self.thing[player].x][self.thing[player].y - 1] = player 
                 self.m.halls[self.thing[player].x][self.thing[player].y] = 0 
                 self.thing[player].y -= 1
+                return
         if self.thing[player].direction == 4:
             if self.m.halls[self.thing[player].x - 1][self.thing[player].y] == 0 :
                 self.m.halls[self.thing[player].x - 1][self.thing[player].y] = player 
                 self.m.halls[self.thing[player].x][self.thing[player].y] = 0 
                 self.thing[player].x -= 1
-
+                return
+            
     def back( self, player ):
         if self.thing[player].direction == 3:
             if self.m.halls[self.thing[player].x][self.thing[player].y + 1] == 0 :
@@ -234,13 +238,16 @@ def status():
 
 @app.route('/shoot', methods=['POST'])
 def shoot():
+    return shoot_thing(1)
+
+def shoot_thing(t):
     global MSRV
-    v = MSRV.view(1)
+    v = MSRV.view(t)
     cno = 0   # cell number of "thing"
     hit = 0
     thing_id = ""
     for d in v:
-        if d[1][1] > 1:
+        if d[1][1] > t:
             thing_id = str(d[1][1])
             hit = 1
             cno = cno
@@ -261,27 +268,54 @@ def shoot():
     #return {"hit": hit, "cell_number": cno, "id": thing_id}
     return jsonify(rtndata, v)
 
+def check_thing(thing):
+    global MSRV
+    if thing.id == MSRV.m.halls[thing.x][thing.y]:
+        print("id" + str(thing.id) + ":  is in the hall where it belongs")
+    else:
+        print("id (" + str(thing.id) +" + hallway fucked up")
+
+    if int(MSRV.thing[int(thing.id)].id) != int(thing.id):
+        print("---------------------another complication, thing.id:" +str(thing.id) + " M:" + str(MSRV.thing[int(thing.id)].id))
+
 @app.route('/heartbeat', methods=['POST'])
 def heartbeat():
     # any dead monsters need to be resurrected?
     # any monsters want to shoot a player or move?
     global MSRV
+    print("heartbeat")
+    '''
     for thing in MSRV.thing:
+        print("top of for loop: thing_id == " + str(thing.id) + ", x, y: " + str(thing.x) + ", " + str(thing.y))
+        if thing.id == MSRV.m.halls[thing.x][thing.y]:
+            print("id is in the hall where it belongs")
+        else:
+            print("id + hallway fucked up")
+    '''
+    for thing in MSRV.thing:
+        print("top of for loop: thing_id == " + str(thing.id) + ", x, y: " + str(thing.x) + ", " + str(thing.y))
+        if thing.type == 2:
+            check_thing(thing)
+            
+        if thing.type != 2:
+            continue
         # resurrect if dead and hallway cell is clear
-        if thing.state == 0 and MSRV.halls[7][7] == 0:
+        if thing.state == 0 and MSRV.m.halls[7][7] == 0:
+            print("resurrection should not happen yet!!!!!!!!!!!!!!!")
             thing.state = 1
-            thing.x = 7
-            thing.y = 7
             thing.hits = 0
             thing.score = 0
             thing.direction = 1
-            MSRV.halls[7][7] = thing.id
+            thing.x = 7
+            thing.y = 7
+            MSRV.m.halls[7][7] = thing.id
             continue
+        
+        # shoot if gremlin sees a player
         DONE = False
         x = thing.x
         y = thing.y
         shoot_flag = False
-        # shoot if gremlin sees a player
         while not DONE:
             if thing.direction == 1:
                 y += 1
@@ -291,71 +325,81 @@ def heartbeat():
                 y -= 1
             if thing.direction == 4:
                 x -= 1
-            if MSRV.halls[x][y] == 1:
+            if MSRV.m.halls[x][y] == 1:
                 #shoot
-                MSRV.shoot(thing.id)
+                shoot_thing(int(thing.id))
                 shoot_flag = True
                 break
-            elif MSRV.halls[x][y] != 0:
+            elif MSRV.m.halls[x][y] != 0:
                 break
         if shoot_flag:
             continue
+
         # if gremlin did not find anything to shoot, look ahead and move
+        x = thing.x
+        y = thing.y
         if thing.direction == 1:
             y += 1
-            center = MSRV.halls[x][y]
-            left =  MSRV.halls[x - 1][y]
-            right = MSRV.halls[x + 1][y]
+            center = MSRV.m.halls[x][y]
+            left =  MSRV.m.halls[x - 1][y]
+            right = MSRV.m.halls[x + 1][y]
         if thing.direction == 2:
             x += 1
-            center = MSRV.halls[x][y]
-            left =  MSRV.halls[x ][y + 1]
-            right = MSRV.halls[x][y - 1]
+            center = MSRV.m.halls[x][y]
+            left =  MSRV.m.halls[x ][y + 1]
+            right = MSRV.m.halls[x][y - 1]
         if thing.direction == 3:
             y -= 1
-            center = MSRV.halls[x][y]
-            left =  MSRV.halls[x + 1][y]
-            right = MSRV.halls[x - 1][y]
+            center = MSRV.m.halls[x][y]
+            left =  MSRV.m.halls[x + 1][y]
+            right = MSRV.m.halls[x - 1][y]
         if thing.direction == 4:
             x -= 1
-            center = MSRV.halls[x][y]
-            left =  MSRV.halls[x][y - 1]
-            right = MSRV.halls[x][y + 1]
+            center = MSRV.m.halls[x][y]
+            left =  MSRV.m.halls[x][y - 1]
+            right = MSRV.m.halls[x][y + 1]
+        print("1: currently, thing_id == " + str(thing.id))
+        print("left: " + str(left) + ", center: " + str(center) + ", right: " + str(right))
         if center == -1:
             # forward is blocked turn left
-            MSRV.left(thing.id)
+            print("left turn, thing_id == " + str(thing.id))
+            MSRV.left(int(thing.id))
             #thing.direction -= 1
             #if thing.direction == 0:
             #    thing.direction = 4
             continue
         if left != 0 and right != 0:
             #move forward
-            MSRV.forward(thing.id)
+            print("no left and no right, go forward: " + str(thing.id))
+            MSRV.forward(int(thing.id))
             continue
+        
         r = random.random()
+        print("2: currently, thing_id == " + str(thing.id))
         if r > 0.6 :
             #move forward
-            MSRV.forward(thing.id)
+            print("greater than 60 percent, go forward")
+            MSRV.forward(int(thing.id))
             continue
         else:
             if r <= 0.3 :
                 if left == 0:
                     #move left
-                    MSRV.left(thing.id)
+                    MSRV.left(int(thing.id))
                     continue
                 else:
-                    MSRV.right(thing.id)
+                    MSRV.right(int(thing.id))
                     continue
             else:
                 if right == 0 :
                     #move right
-                    MSRV.right(thing.id)
+                    MSRV.right(int(thing.id))
                     continue
                 else:
                     #move left
-                    MSRV.left(thing.id)
+                    MSRV.left(int(thing.id))
                     continue
-    return
+    return "Ok"
 
 def main(argv=None):
     import sys
