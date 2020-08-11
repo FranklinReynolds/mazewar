@@ -4,6 +4,7 @@ from tkinter import *
 import requests
 import re
 import json
+import time
 
 root = Tk()
 
@@ -16,6 +17,13 @@ butt = Button(fram, text='Start')
 butt.pack(side=RIGHT)
 anotherbutt = Button(fram, text='Stop')
 anotherbutt.pack(side=RIGHT)
+
+offset = 10
+#spacing: 100, 170, 220, 256, 282, 302, 318, 331
+roof = [[100 + offset, 100 + offset], [170 + offset, 170 + offset], [220 + offset, 220 + offset], [256 + offset, 256 + offset], [ 282 + offset, 282 + offset], [302 + offset, 302 + offset], [318 + offset, 318 + offset], [ 331 + offset, 331+ offset]]
+baseline = (331 * 2) + 5 + offset
+    
+floor = [[100 + offset, baseline -100], [170 + offset, baseline - 170], [220 + offset, baseline - 220], [256 + offset, baseline - 256], [ 282 + offset, baseline - 282], [302 + offset, baseline - 302], [318 + offset, baseline - 318], [ 331 + offset, baseline - 331]]
 
 def keydown(e):
     global CAN
@@ -58,17 +66,30 @@ fram.pack(side=TOP)
 fram.focus_set()
 CAN.pack(side=TOP, fill=BOTH, expand=1)
 
+def hit(cno, blinkcount):
+    global CAN
+    global offset, roof, baseline, floor
+    #CAN.delete(ALL)
+    # num_cells is the number of cells the target is away from the player
+    # blink the target
+    if blinkcount < 1:
+        CAN.create_oval(roof[cno][0], roof[cno][1], baseline - floor[cno][0], floor[cno][1], fill='#fff')
+        return
+    for i in range(blinkcount):
+        CAN.create_oval(roof[cno][0], roof[cno][1], baseline - floor[cno][0], floor[cno][1], fill='#f00')
+        CAN.update()
+        time.sleep(0.5)
+        CAN.create_oval(roof[cno][0], roof[cno][1], baseline - floor[cno][0], floor[cno][1], fill='#fff')
+        CAN.update()
+    return
+
 def show(v):
     print("type...")
     print(type(v))
-    view = json.loads(v)
-    offset = 10
-    #spacing: 100, 170, 220, 256, 282, 302, 318, 331
-    roof = [[100 + offset, 100 + offset], [170 + offset, 170 + offset], [220 + offset, 220 + offset], [256 + offset, 256 + offset], [ 282 + offset, 282 + offset], [302 + offset, 302 + offset], [318 + offset, 318 + offset], [ 331 + offset, 331+ offset]]
-    baseline = (331 * 2) + 5 + offset
-    
-    floor = [[100 + offset, baseline -100], [170 + offset, baseline - 170], [220 + offset, baseline - 220], [256 + offset, baseline - 256], [ 282 + offset, baseline - 282], [302 + offset, baseline - 302], [318 + offset, baseline - 318], [ 331 + offset, baseline - 331]]
+    #view = json.loads(v)
+    view = v
     global CAN
+    global offset, roof, baseline, floor
     CAN.delete(ALL)
     #CAN.create.circle(x,y,...)
     cno = 0
@@ -125,8 +146,8 @@ def show(v):
         if c > 0 and cno != 0:
             print("draw monster")
             # monster or other player (current player is at home cell)
-            CAN.create_oval(roof[cno][0], roof[cno][1], baseline - floor[cno][0], floor[cno][1], fill='#fff')
-            
+            #CAN.create_oval(roof[cno][0], roof[cno][1], baseline - floor[cno][0], floor[cno][1], fill='#fff')
+            hit(cno, 0)
         # wall in center hallway
         if r == -1 and c != -1:
             print("wall to right, no wall in center")
@@ -167,30 +188,32 @@ def show(v):
 def forward():
     #r = requests.post('http://localhost:5000/forward', data = {'key': 'value'})
     r = requests.post('http://localhost:5000/forward')
-    show(r.text)
+    show(json.loads(r.text))
 
 def left():
     #r = requests.post('http://localhost:5000/forward', data = {'key': 'value'})
     print("left")
     r = requests.post('http://localhost:5000/left')
     print(r.text)
-    show(r.text)
+    #show(r.text)
+    show(json.loads(r.text))
 
 def right():
     print("right")
     r = requests.post('http://localhost:5000/right')
-    show(r.text)
+    show(json.loads(r.text))
 
 def back():
     print("back")
     r = requests.post('http://localhost:5000/back')
-    show(r.text)
+    show(json.loads(r.text))
     
 def info():
     print("info")
     r = requests.post('http://localhost:5000/info')
     print("info dump")
     print(r.text)
+    return
 
 def display():
     print("display halls on the server")
@@ -207,7 +230,13 @@ def clear():
 
 def shoot():
     print("shoot")
-    left()
+    r = requests.post('http://localhost:5000/shoot')
+    print(r.text)
+    rtn_args = json.loads(r.text)
+    if rtn_args[0]['hit'] == 1:
+        hit(rtn_args[0]['cell_number'], 1)
+        if rtn_args[0]['state'] == 0:
+            show(rtn_args[1])
     return
 
 def do_mouse(eventname):
