@@ -7,7 +7,7 @@
 #              can move Gremlins, etc. without player intervention.
 #              It also controls the pace at which the Gremlims act.
 #
-#              python3 heartbeat -r [-1,0,N]
+#              python3 heartbeat -r [-1,0,N] -s [1-60 seconds between heartbeats]
 #
 
 import requests
@@ -22,15 +22,18 @@ def forward():
 def cliparse(argv):
     parser = argparse.ArgumentParser()
     parser.add_argument('-r', '--repetitions', type=int, default=1, help="N==repeat N times; -1 repeat forever")
+    parser.add_argument('-s', '--sleep', type=int, default=1, choices=range(1,60), help="N==number of seconds to sleep between heartbeats")
     return args
     
 def main():
     args = cliparse(sys.argv[1:])
+    sleep = args.sleep
     repetitions = args.repetitions
     count = 0
 
     while True:
         forward()
+        time.sleep(sleep)
         if repetitions == -1:
             continue
         count += 1
