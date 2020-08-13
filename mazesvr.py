@@ -283,25 +283,17 @@ def heartbeat():
     # any dead monsters need to be resurrected?
     # any monsters want to shoot a player or move?
     global MSRV
-    print("heartbeat")
-    '''
+    #print("heartbeat")
     for thing in MSRV.thing:
-        print("top of for loop: thing_id == " + str(thing.id) + ", x, y: " + str(thing.x) + ", " + str(thing.y))
-        if thing.id == MSRV.m.halls[thing.x][thing.y]:
-            print("id is in the hall where it belongs")
-        else:
-            print("id + hallway fucked up")
-    '''
-    for thing in MSRV.thing:
-        print("top of for loop: thing_id == " + str(thing.id) + ", x, y: " + str(thing.x) + ", " + str(thing.y))
-        if thing.type == 2:
-            check_thing(thing)
+        #print("top of for loop: thing_id == " + str(thing.id) + ", x, y: " + str(thing.x) + ", " + str(thing.y))
+        #if thing.type == 2:
+        #    check_thing(thing)
             
         if thing.type != 2:
             continue
         # resurrect if dead and hallway cell is clear
         if thing.state == 0 and MSRV.m.halls[7][7] == 0:
-            print("resurrection should not happen yet!!!!!!!!!!!!!!!")
+            #print("resurrection should not happen yet!!!!!!!!!!!!!!!")
             thing.state = 1
             thing.hits = 0
             thing.score = 0
@@ -358,47 +350,35 @@ def heartbeat():
             center = MSRV.m.halls[x][y]
             left =  MSRV.m.halls[x][y - 1]
             right = MSRV.m.halls[x][y + 1]
-        print("1: currently, thing_id == " + str(thing.id))
-        print("left: " + str(left) + ", center: " + str(center) + ", right: " + str(right))
-        if center == -1:
+            
+        #print("1: currently, thing_id == " + str(thing.id))
+        #print("left: " + str(left) + ", center: " + str(center) + ", right: " + str(right))
+        if center != 0:
             # forward is blocked turn left
-            print("left turn, thing_id == " + str(thing.id))
+            #print("left turn, thing_id == " + str(thing.id))
             MSRV.left(int(thing.id))
-            #thing.direction -= 1
-            #if thing.direction == 0:
-            #    thing.direction = 4
             continue
         if left != 0 and right != 0:
             #move forward
-            print("no left and no right, go forward: " + str(thing.id))
+            #print("no left and no right, go forward: " + str(thing.id))
             MSRV.forward(int(thing.id))
             continue
         
         r = random.random()
-        print("2: currently, thing_id == " + str(thing.id))
-        if r > 0.6 :
+        #print("2: currently, thing_id == " + str(thing.id))
+        if r < 0.25 and left == 0:
+            #move left
+            MSRV.left(int(thing.id))
+            continue
+        if r < 0.25 and right== 0:
+            #move right
+            MSRV.right(int(thing.id))
+            continue
+        if center == 0:
             #move forward
-            print("greater than 60 percent, go forward")
             MSRV.forward(int(thing.id))
             continue
-        else:
-            if r <= 0.3 :
-                if left == 0:
-                    #move left
-                    MSRV.left(int(thing.id))
-                    continue
-                else:
-                    MSRV.right(int(thing.id))
-                    continue
-            else:
-                if right == 0 :
-                    #move right
-                    MSRV.right(int(thing.id))
-                    continue
-                else:
-                    #move left
-                    MSRV.left(int(thing.id))
-                    continue
+
     return "Ok"
 
 def main(argv=None):
@@ -408,10 +388,10 @@ def main(argv=None):
 
     if argv is None:
         argv = sys.argv
-    print("mazesrv:just testing")
+    #print("mazesrv:just testing")
     MSRV = mazesvr()
-    MSRV.m.display()
-    app.run(debug=True, host='0.0.0.0')
+    #MSRV.m.display()
+    app.run(debug=False, host='0.0.0.0')
 
 if __name__ == "__main__":
     print("inside __name__")
