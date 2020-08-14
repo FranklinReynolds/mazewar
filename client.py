@@ -66,6 +66,24 @@ fram.pack(side=TOP)
 fram.focus_set()
 CAN.pack(side=TOP, fill=BOTH, expand=1)
 
+def draw_eye(cno):
+    global CAN
+    global offset, roof, baseline, floor
+
+    CAN.create_oval(roof[cno][0], roof[cno][1], baseline - floor[cno][0], floor[cno][1], fill='#fff')
+    #(ry-fy)*(3/4) + fy
+    topy = (roof[cno][1] -floor[cno][1]) * (3/4) + floor[cno][1]
+    #(ry-fy)*(1/4) + fy
+    bottomy = (roof[cno][1] -floor[cno][1]) * (1/4) + floor[cno][1]
+    CAN.create_arc(roof[cno][0], topy, baseline - floor[cno][0], bottomy,start=0, extent=180, style=ARC)
+    CAN.create_arc(roof[cno][0], topy, baseline - floor[cno][0], bottomy,start=180, extent=180, style=ARC)
+    #(eastx - westx) * (1/4) + westx
+    #(eastx - westx) * (3/4) + westx
+    roofx = (baseline - floor[cno][0] - roof[cno][0]) * (1/4) + roof[cno][0]
+    floorx = (baseline - floor[cno][0] - roof[cno][0]) * (3/4) + roof[cno][0]
+    CAN.create_oval(roofx, topy, floorx, bottomy, fill='#000')
+    #CAN.update()
+
 def hit(cno, blinkcount):
     global CAN
     global offset, roof, baseline, floor
@@ -73,13 +91,13 @@ def hit(cno, blinkcount):
     # num_cells is the number of cells the target is away from the player
     # blink the target
     if blinkcount < 1:
-        CAN.create_oval(roof[cno][0], roof[cno][1], baseline - floor[cno][0], floor[cno][1], fill='#fff')
+        draw_eye(cno)
         return
     for i in range(blinkcount):
         CAN.create_oval(roof[cno][0], roof[cno][1], baseline - floor[cno][0], floor[cno][1], fill='#f00')
         CAN.update()
         time.sleep(0.5)
-        CAN.create_oval(roof[cno][0], roof[cno][1], baseline - floor[cno][0], floor[cno][1], fill='#fff')
+        draw_eye(cno)
         CAN.update()
     return
 
