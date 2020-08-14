@@ -84,21 +84,19 @@ def hit(cno, blinkcount):
     return
 
 def show(v):
-    print("type...")
-    print(type(v))
     #view = json.loads(v)
     view = v
     global CAN
     global offset, roof, baseline, floor
     CAN.delete(ALL)
-    #CAN.create.circle(x,y,...)
     cno = 0
     num = 0
     preroofx = offset
     preroofy = offset
     prefloorx = offset
     prefloory = baseline
-    print("view = " + str(view))
+    monster_list = []
+    
     while num < len(view):
         # skip view[0] cuz that contains the player
         # and we only want to draw what is in front of the player
@@ -118,21 +116,22 @@ def show(v):
             if view[num -1][1][0] != -1:
                 # prev left cell not WALL, so draw beginning of current wall
                 CAN.create_line(preroofx, preroofy, prefloorx, prefloory)
+
         if l != -1 and c == -1 and view[num - 1][1][0] != -1:
             # draw slanted roof on left
             CAN.create_line(preroofx, preroofy, roof[cno][0], preroofy)
             # floor line
             CAN.create_line(prefloorx, prefloory, floor[cno][0], prefloory)
+            
         if l != -1 and c != -1:
-            # left hallway
-            # horizontal roof line
+            # left hallway; horizontal roof line
             CAN.create_line(preroofx, roof[cno][1], roof[cno][0], roof[cno][1])
             # floor line
             CAN.create_line(prefloorx, floor[cno][1], floor[cno][0], floor[cno][1])
             if view[num - 1][1][0] == -1 and cno > 0:
                 # prev left cell not WALL, so draw beginning of current wall
-                #CAN.create_line(roof[cno][0],roof[cno][1], floor[cno][0], floor[cno][1])
                 CAN.create_line(preroofx,preroofy, prefloorx, prefloory)
+                
         if c == -1 :
             print("draw central wall")
             # draw roof
@@ -143,11 +142,14 @@ def show(v):
             CAN.create_line(preroofx, preroofy,  prefloorx, prefloory)
             # draw right vertical edge
             CAN.create_line(baseline - preroofx, preroofy, baseline - prefloorx, prefloory)
+            
         if c > 0 and cno != 0:
             print("draw monster")
             # monster or other player (current player is at home cell)
             #CAN.create_oval(roof[cno][0], roof[cno][1], baseline - floor[cno][0], floor[cno][1], fill='#fff')
-            hit(cno, 0)
+            #hit(cno, 0)
+            monster_list.append((cno, 0))
+            
         # wall in center hallway
         if r == -1 and c != -1:
             print("wall to right, no wall in center")
@@ -184,6 +186,11 @@ def show(v):
         prefloory = floor[cno][1]
         num += 1
         continue
+    
+    #drain and display items in  the monster list
+    while monster_list:
+        m = monster_list.pop()
+        hit(m[0],m[1])
 
 def forward():
     #r = requests.post('http://localhost:5000/forward', data = {'key': 'value'})
