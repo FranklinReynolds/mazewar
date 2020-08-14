@@ -26,4 +26,6 @@ To Do:
 - refactor everything to make it less horrible	
 - start/stop
 - login/logout
-
+- make port selection optional
+- add better wsgi component
+- clean up UI
