@@ -23,6 +23,8 @@ Dependencies:
 
 To Do:
 - refactor everything to make it less horrible	
+- back and side views of beholder
+- multiple player support
 - start/stop
 - login/logout
 - make port selection optional
