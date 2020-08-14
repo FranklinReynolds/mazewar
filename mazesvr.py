@@ -1,9 +1,13 @@
 #!/usr/bin/python3
 # 
-# Simple MazeWar Program
+# Simple MazeWar Program: The Server
 # Author: Franklin Reynolds
-# Date: Feb 19, 2007
+# Date: Aug 10, 2020
 #
+# Description: Server implemented using Flask. Exports
+#              a "rest" interface. Currently uses port 5000
+#
+#               Python3 mazesrv.py
 
 from flask import Flask
 from flask import jsonify
@@ -15,6 +19,15 @@ app = Flask(__name__)
 
 MSRV = None
 
+WALL = -1
+EMPTY = 0
+PLAYER = 1
+GREMLIN = 2
+NORTH = 1
+EAST = 2
+SOUTH = 3
+WEST = 4
+
 print("before class")
 class mazesvr:
 
@@ -25,35 +38,37 @@ class mazesvr:
     NumOfPlayers = 7
 
     def __init__(self):
+        global NORTH, EAST, SOUTH, WEST
+
         random.seed()
         
         for i in range(0, self.NumOfPlayers+1):
-            self.thing.append( THING.Thing(1, 1, self.m.PLAYER, "Player"+str(i), "", 1, i) )
+            self.thing.append( THING.Thing(1, 1, self.m.PLAYER, "Player"+str(i), "", NORTH, i) )
             self.m.halls[1][1] = 1
         self.LASTPLAYER = self.NumOfPlayers
         count = self.NumOfPlayers + 1
-        self.thing.append(THING.Thing(1, 5, self.m.GREMLIN, "Gremlin 1", "", 1, count))
+        self.thing.append(THING.Thing(1, 5, self.m.GREMLIN, "Gremlin 1", "", NORTH, count))
         self.m.halls[1][5] = count;
         count += 1
-        self.thing.append( THING.Thing(7, 5, self.m.GREMLIN, "Gremlin 2", "", 2, count))
+        self.thing.append( THING.Thing(7, 5, self.m.GREMLIN, "Gremlin 2", "", EAST, count))
         self.m.halls[7][5] = count;
         count += 1
-        self.thing.append(THING.Thing(13, 13, self.m.GREMLIN, "Gremlin 3", "", 3, count))
+        self.thing.append(THING.Thing(13, 13, self.m.GREMLIN, "Gremlin 3", "", SOUTH, count))
         self.m.halls[13][13] = count;
         count += 1
-        self.thing.append(THING.Thing(13, 5, self.m.GREMLIN, "Gremlin 4", "", 4, count))
+        self.thing.append(THING.Thing(13, 5, self.m.GREMLIN, "Gremlin 4", "", WEST, count))
         self.m.halls[13][5] = count;
         count += 1
-        self.thing.append(THING.Thing(5, 13, self.m.GREMLIN, "Gremlin 5", "", 1, count))
+        self.thing.append(THING.Thing(5, 13, self.m.GREMLIN, "Gremlin 5", "", NORTH, count))
         self.m.halls[5][13] = count;
         count += 1
-        self.thing.append(THING.Thing(3, 11, self.m.GREMLIN, "Gremlin 6", "", 2, count))
+        self.thing.append(THING.Thing(3, 11, self.m.GREMLIN, "Gremlin 6", "", EAST, count))
         self.m.halls[3][11] = count;
         count += 1
-        self.thing.append(THING.Thing(11, 9, self.m.GREMLIN, "Gremlin 7", "", 3, count))
+        self.thing.append(THING.Thing(11, 9, self.m.GREMLIN, "Gremlin 7", "", SOUTH, count))
         self.m.halls[11][9] = count;
         count += 1
-        self.thing.append(THING.Thing(9, 1, self.m.GREMLIN, "Gremlin 8", "", 4, count))
+        self.thing.append(THING.Thing(9, 1, self.m.GREMLIN, "Gremlin 8", "", WEST, count))
         self.m.halls[9][1] = count;
         count += 1
         print("mazesvr view of maze")
@@ -99,25 +114,26 @@ class mazesvr:
             self.thing[player].direction = 1
 
     def forward( self, player ):
-        if self.thing[player].direction == 1:
+        global NORTH, EAST, SOUTH, WEST
+        if self.thing[player].direction == NORTH:
             if self.m.halls[self.thing[player].x][self.thing[player].y + 1] == 0 :
                 self.m.halls[self.thing[player].x][self.thing[player].y + 1] = player 
                 self.m.halls[self.thing[player].x][self.thing[player].y] = 0 
                 self.thing[player].y += 1
                 return
-        if self.thing[player].direction == 2:
+        if self.thing[player].direction == EAST:
             if self.m.halls[self.thing[player].x +1][self.thing[player].y] == 0 :
                 self.m.halls[self.thing[player].x + 1][self.thing[player].y] = player 
                 self.m.halls[self.thing[player].x][self.thing[player].y] = 0 
                 self.thing[player].x += 1
                 return
-        if self.thing[player].direction == 3:
+        if self.thing[player].direction == SOUTH:
             if self.m.halls[self.thing[player].x][self.thing[player].y - 1] == 0 :
                 self.m.halls[self.thing[player].x][self.thing[player].y - 1] = player 
                 self.m.halls[self.thing[player].x][self.thing[player].y] = 0 
                 self.thing[player].y -= 1
                 return
-        if self.thing[player].direction == 4:
+        if self.thing[player].direction == WEST:
             if self.m.halls[self.thing[player].x - 1][self.thing[player].y] == 0 :
                 self.m.halls[self.thing[player].x - 1][self.thing[player].y] = player 
                 self.m.halls[self.thing[player].x][self.thing[player].y] = 0 
@@ -125,28 +141,31 @@ class mazesvr:
                 return
             
     def back( self, player ):
-        if self.thing[player].direction == 3:
+        global NORTH, EAST, SOUTH, WEST
+        
+        if self.thing[player].direction == SOUTH:
             if self.m.halls[self.thing[player].x][self.thing[player].y + 1] == 0 :
                 self.m.halls[self.thing[player].x][self.thing[player].y + 1] = player 
                 self.m.halls[self.thing[player].x][self.thing[player].y] = 0 
                 self.thing[player].y += 1
-        if self.thing[player].direction == 4:
+        if self.thing[player].direction == WEST:
             if self.m.halls[self.thing[player].x +1][self.thing[player].y] == 0 :
                 self.m.halls[self.thing[player].x + 1][self.thing[player].y] = player 
                 self.m.halls[self.thing[player].x][self.thing[player].y] = 0 
                 self.thing[player].x += 1
-        if self.thing[player].direction == 1:
+        if self.thing[player].direction == NORTH:
             if self.m.halls[self.thing[player].x][self.thing[player].y - 1] == 0 :
                 self.m.halls[self.thing[player].x][self.thing[player].y - 1] = player 
                 self.m.halls[self.thing[player].x][self.thing[player].y] = 0 
                 self.thing[player].y -= 1
-        if self.thing[player].direction == 2:
+        if self.thing[player].direction == EAST:
             if self.m.halls[self.thing[player].x - 1][self.thing[player].y] == 0 :
                 self.m.halls[self.thing[player].x - 1][self.thing[player].y] = player 
                 self.m.halls[self.thing[player].x][self.thing[player].y] = 0 
                 self.thing[player].x -= 1
 
     def view( self, player ):
+        global WALL, NORTH, EAST, SOUTH, WEST
         direc = self.thing[player].direction
         x = self.thing[player].x
         y = self.thing[player].y
@@ -157,22 +176,20 @@ class mazesvr:
         while not DONE:
             # append LEFT, CENTER, RIGHT
             cellnum += 1
-            if self.m.halls[x][y] == -1:
+            if self.m.halls[x][y] == WALL:
                 DONE = True
-            if direc == 1:
+            if direc == NORTH:
                 view.append((str(cellnum),(self.m.halls[x-1][y],self.m.halls[x][y],self.m.halls[x+1][y])))
                 y += 1
-            elif direc == 2:
+            elif direc == EAST:
                 view.append((str(cellnum),(self.m.halls[x][y+1],self.m.halls[x][y],self.m.halls[x][y-1])))
                 x += 1
-            elif direc == 3:
+            elif direc == SOUTH:
                 view.append((str(cellnum),(self.m.halls[x+1][y],self.m.halls[x][y],self.m.halls[x-1][y])))
                 y -= 1
-            elif direc == 4:
+            elif direc == WEST:
                 view.append((str(cellnum),(self.m.halls[x][y-1],self.m.halls[x][y],self.m.halls[x][y+1])))
                 x -= 1
-            print("view")
-            print(view)
 
         return view
     
@@ -265,64 +282,49 @@ def shoot_thing(t):
                 v = MSRV.view(1)
             break
     rtndata = {"hit": hit, "cell_number": cno, "id": thing_id, "state": state}
-    #return {"hit": hit, "cell_number": cno, "id": thing_id}
     return jsonify(rtndata, v)
-
-def check_thing(thing):
-    global MSRV
-    if thing.id == MSRV.m.halls[thing.x][thing.y]:
-        print("id" + str(thing.id) + ":  is in the hall where it belongs")
-    else:
-        print("id (" + str(thing.id) +" + hallway fucked up")
-
-    if int(MSRV.thing[int(thing.id)].id) != int(thing.id):
-        print("---------------------another complication, thing.id:" +str(thing.id) + " M:" + str(MSRV.thing[int(thing.id)].id))
 
 @app.route('/heartbeat', methods=['POST'])
 def heartbeat():
     # any dead monsters need to be resurrected?
     # any monsters want to shoot a player or move?
-    global MSRV
-    #print("heartbeat")
+    global MSRV, EMPTY, GREMLIN, NORTH, EAST, SOUTH, WEST
+
     for thing in MSRV.thing:
-        #print("top of for loop: thing_id == " + str(thing.id) + ", x, y: " + str(thing.x) + ", " + str(thing.y))
-        #if thing.type == 2:
-        #    check_thing(thing)
-            
-        if thing.type != 2:
+
+        if thing.type != GREMLIN:
             continue
         # resurrect if dead and hallway cell is clear
-        if thing.state == 0 and MSRV.m.halls[7][7] == 0:
+        if thing.state == EMPTY and MSRV.m.halls[7][7] == EMPTY:
             #print("resurrection should not happen yet!!!!!!!!!!!!!!!")
             thing.state = 1
             thing.hits = 0
             thing.score = 0
-            thing.direction = 1
+            thing.direction = NORTH
             thing.x = 7
             thing.y = 7
             MSRV.m.halls[7][7] = thing.id
             continue
         
-        # shoot if gremlin sees a player
+        # look down hallway and shoot if gremlin sees a player
         DONE = False
         x = thing.x
         y = thing.y
         shoot_flag = False
         while not DONE:
-            if thing.direction == 1:
+            if thing.direction == NORTH:
                 y += 1
-            if thing.direction == 2:
+            if thing.direction == EAST:
                 x += 1
-            if thing.direction == 3:
+            if thing.direction == SOUTH:
                 y -= 1
-            if thing.direction == 4:
+            if thing.direction == WEST:
                 x -= 1
             if MSRV.m.halls[x][y] == 1:
-                #shoot
                 shoot_thing(int(thing.id))
                 shoot_flag = True
                 break
-            elif MSRV.m.halls[x][y] != 0:
+            elif MSRV.m.halls[x][y] != EMPTY:
                 break
         if shoot_flag:
             continue
@@ -330,51 +332,46 @@ def heartbeat():
         # if gremlin did not find anything to shoot, look ahead and move
         x = thing.x
         y = thing.y
-        if thing.direction == 1:
+        if thing.direction == NORTH:
             y += 1
             center = MSRV.m.halls[x][y]
             left =  MSRV.m.halls[x - 1][y]
             right = MSRV.m.halls[x + 1][y]
-        if thing.direction == 2:
+        if thing.direction == EAST:
             x += 1
             center = MSRV.m.halls[x][y]
             left =  MSRV.m.halls[x ][y + 1]
             right = MSRV.m.halls[x][y - 1]
-        if thing.direction == 3:
+        if thing.direction == SOUTH:
             y -= 1
             center = MSRV.m.halls[x][y]
             left =  MSRV.m.halls[x + 1][y]
             right = MSRV.m.halls[x - 1][y]
-        if thing.direction == 4:
+        if thing.direction == WEST:
             x -= 1
             center = MSRV.m.halls[x][y]
             left =  MSRV.m.halls[x][y - 1]
             right = MSRV.m.halls[x][y + 1]
             
-        #print("1: currently, thing_id == " + str(thing.id))
-        #print("left: " + str(left) + ", center: " + str(center) + ", right: " + str(right))
-        if center != 0:
+        if center != EMPTY:
             # forward is blocked turn left
-            #print("left turn, thing_id == " + str(thing.id))
             MSRV.left(int(thing.id))
             continue
-        if left != 0 and right != 0:
+        if left != EMPTY and right != EMPTY:
             #move forward
-            #print("no left and no right, go forward: " + str(thing.id))
             MSRV.forward(int(thing.id))
             continue
         
         r = random.random()
-        #print("2: currently, thing_id == " + str(thing.id))
-        if r < 0.25 and left == 0:
+        if r < 0.25 and left == EMPTY:
             #move left
             MSRV.left(int(thing.id))
             continue
-        if r < 0.25 and right== 0:
+        if r < 0.25 and right== EMPTY:
             #move right
             MSRV.right(int(thing.id))
             continue
-        if center == 0:
+        if center == EMPTY:
             #move forward
             MSRV.forward(int(thing.id))
             continue
@@ -388,11 +385,8 @@ def main(argv=None):
 
     if argv is None:
         argv = sys.argv
-    #print("mazesrv:just testing")
     MSRV = mazesvr()
-    #MSRV.m.display()
     app.run(debug=False, host='0.0.0.0')
 
 if __name__ == "__main__":
-    print("inside __name__")
     main()
