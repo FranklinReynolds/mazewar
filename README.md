@@ -13,16 +13,15 @@ If you want the monsters to move, you need to run the heartbeat.py (python3 hear
 Dependencies:
    mazesrv:
      flask
+     random
      jsonify
    client:
      requests
      time
      random
-     
+     json
 
 To Do:
-- report current score  via "info"
-- add loop to client to repeatedly call info (mostly to report hits)
 - refactor everything to make it less horrible	
 - start/stop
 - login/logout
