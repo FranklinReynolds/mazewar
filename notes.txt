@@ -4,7 +4,9 @@ I first heard of the computer game MazeWar in the early 80s. It was an early (ma
 
 MazeWar is a relatively simple, multi-player game. Players wander around a maze and shoot at monsters and other players. You get points for shooting players or monsters and you lose points for being shoot.
 
-I remember being pretty annoyed when I discovered the sys admin who was running things mentioned that he had arranged a "cheat" in which new players always entered the maze in front of the sys admin and with their back turned. This allowed the sys admin to get in several free shots.
+I remember being pretty annoyed when I discovered the sys admin who was running things mentioned that he had arranged a "cheat" in which new players always entered the maze in front of the sys admin and with their back turned. This allowed the sys admin to get in several free shots. For more on the history of Mazewar you can check out:
+
+     https://en.wikipedia.org/wiki/Maze_War
 
 Anyway, years later when my kids were just old enough to start playing computer game (sometime in the 90s), I implemented my version of MazeWar, just for fun. The kids enjoyed playing the game (mostly cuz their Dad made it) for a day or two. I had a version that used curses (curses was a ascii terminal library - again, you are probably too young to know about this sort of thing) to render the maze and another version that used simple line art.
 
@@ -12,17 +14,25 @@ Since then, I have often thought MazeWar would be a great way to experiment with
 
 First, I needed a working MazeWar game. My previous versions are long gone but how hard could it be to create a new version? Besides, this way I could use Python or some other modern programming language. I could also build it using a client/server model to make some of planned UI experiments easier.
 
-First Version
+Tools: Python and frameworks
 
-I had been using Python for most of my programming projects for the last 5 or 6 years so I decided to use Python. I thought about picking a new language like Rust or an old language like Lisp. But eventually I decided to use Python for the first version. I figured I could experiment with different implementation languages in the future.
+I had been using Python for most of my programming projects for the last 6 or more years so I decided to use Python. I thought about picking a new language like Rust or an old language like Lisp. But eventually I decided to use Python for the first version. I figured I could experiment with different implementation languages in the future.
 
-I think Python's current popularity is interesting. 10 years ago there was quite a bit comparison between Python and Ruby. I used Ruby for about a year and it was probably the most pleasant to use programming language I have ever tried. However, even then it seemed to me that Ruby was not enjoying the widespread adoption of Python. Certainly that proved to be true in my personal experience.
+I think Python's current popularity is interesting. Recently (I just googled this in Aug 2020), the Tiobe Index, PYPL, IEEE and RedMonk all list Python in the top three most popular languages. 10 years ago there was quite a bit comparison between Python and Ruby. I used Ruby for about a year and it was probably the most pleasant to use programming language I have ever tried. However, even then it seemed to me that Ruby was not enjoying the widespread adoption of Python. Certainly since then that has proved to be true.
 
 Even though I once preferred Ruby, I am now very comfortable with Python. It is a reasonable language with decent documentation and wonderful libraries. On the other hand, I really don't like a few things about Python:
   - indentation to indicate code blocks (terrible choice responsible for more bugs than anything else I can think of)
   - crippled lambdas (Ruby blocks are dramatically better)
   - GIL (global interpreter lock)
+  - pdb (python debugger) still fails more often  than I would like
 However, none of these problems are so severe I avoid using Python (though sometimes when I run into the lastest indentation bug ...).
+
+One of Python's greatest strengths, its huge collection of excellent libraries can be confusing when trying to choose which library to use. There is a lot of libraries that provide similar but not identical features. Picking the ones best for your project can be a little frustrating. For this project I have chosen libraries I already have at least some experience using so that I spend most of my time creating my app rather than spending time learning how to use a cool, new library. In particular, I use TkInter for the GUI and Flask for the initial server. There are plenty of other GUI packages including PyGTK and PyQt but Tk (sometimes called TkInter) has been a key part of Python for a very long time. I find it easy to understand and it meets my needs.
+
+There are more Web Frameworks for Python than ... well, there are a lot. Recently I had a lot of experience with Django and it overkill for my needs. I also had a fair amount of experience with Twisted but again, it did not seem like a good fit for this project. I had a little experience with Flask and it seemed like it was small and simple enough to be a good match. Frameworks like Pyramid or CherryPy look interesting but Flask seems to do the job perfectly well.
+
+Initial Architecture
+
 
 ================================================
 l == wall and c != wall   # center hallway
