@@ -60,7 +60,7 @@ def keydown(e):
     print("button pressed = ", e.char)
 
 # and finally the canvas
-CAN = Canvas(root)
+CAN = Canvas(root, height=800, width=600)
 fram.bind("<KeyPress>", keydown)
 fram.pack(side=TOP)
 fram.focus_set()
@@ -79,17 +79,20 @@ def draw_eye(cno):
     CAN.create_arc(roof[cno][0], topy, baseline - floor[cno][0], bottomy,start=180, extent=180, style=ARC)
     #(eastx - westx) * (1/4) + westx
     #(eastx - westx) * (3/4) + westx
-    roofx = (baseline - floor[cno][0] - roof[cno][0]) * (1/4) + roof[cno][0]
-    floorx = (baseline - floor[cno][0] - roof[cno][0]) * (3/4) + roof[cno][0]
-    CAN.create_oval(roofx, topy, floorx, bottomy, fill='#000')
-    #CAN.update()
+    irisroofx = (baseline - floor[cno][0] - roof[cno][0]) * (1/4) + roof[cno][0]
+    irisfloorx = (baseline - floor[cno][0] - roof[cno][0]) * (3/4) + roof[cno][0]
+    CAN.create_oval(irisroofx, topy, irisfloorx, bottomy, fill='#999')
+    pupilroofx = (baseline - floor[cno][0] - roof[cno][0]) * (1/3) + roof[cno][0]
+    pupilfloorx = (baseline - floor[cno][0] - roof[cno][0]) * (2/3) + roof[cno][0]
+    pupiltopy = (roof[cno][1] -floor[cno][1]) * (2/3) + floor[cno][1]
+    #(ry-fy)*(1/4) + fy
+    pupilbottomy = (roof[cno][1] -floor[cno][1]) * (1/3) + floor[cno][1]
+    CAN.create_oval(pupilroofx, pupiltopy, pupilfloorx, pupilbottomy, fill='#000')
 
 def hit(cno, blinkcount):
     global CAN
     global offset, roof, baseline, floor
-    #CAN.delete(ALL)
-    # num_cells is the number of cells the target is away from the player
-    # blink the target
+
     if blinkcount < 1:
         draw_eye(cno)
         return
@@ -234,12 +237,21 @@ def back():
     show(json.loads(r.text))
     
 def info():
-    print("info")
+    global CAN
     r = requests.post('http://localhost:5000/info')
     print("info dump")
     print(r.text)
+    rtn_args = json.loads(r.text)
+    txt = "hits = " + str(rtn_args['hits']) + ', score = ' + str(rtn_args['score'])
+    msg = Label
+    CAN.delete("tmp_txt")
+    CAN.create_text(100,750,anchor='sw', text=txt, tag="tmp_txt")
     return
 
+def ping():
+    info()
+    root.after(1000, ping)
+    
 def display():
     print("display halls on the server")
     r = requests.post('http://localhost:5000/display')
@@ -281,6 +293,7 @@ do_mouse('Button-1')
 
 def main():
     global root
+    root.after(1000, ping)
     root.mainloop()
 
 if __name__ == "__main__":

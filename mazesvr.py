@@ -96,12 +96,11 @@ class mazesvr:
     def display(self):
         self.m.display()
         for i in self.thing:
-            print("id: " + str(i.id) + " x,y: " + str(i.x) + ", " + str(i.y) + ", state: " + str(i.state) + ", hits: " + str(i.hits))
+            print("id: " + str(i.id) + " x,y: " + str(i.x) + ", " + str(i.y) + ", state: " + str(i.state) + ", score: " + str(i.score) + ", hits: " + str(i.hits))
         return
     
     def info( self, player ):
-        print("player: " + str(player) + ", direction: " + str(self.thing[player].direction) + ", x, y"+ str(self.thing[player].x) + ", " + str(self.thing[player].y))
-        return (player, self.thing[player].direction, self.thing[player].x, self.thing[player].y)
+        return ({'player_number':player, 'player_id':self.thing[player].id, 'direction': self.thing[player].direction, 'x':self.thing[player].x, 'y':self.thing[player].y, 'hits':self.thing[player].hits, 'score':self.thing[player].score})
     
     def left( self, player ):
         self.thing[player].direction -= 1
@@ -222,9 +221,6 @@ def left():
     global MSRV
     MSRV.left(1)
     v = MSRV.view(1)
-    print("jsonify test")
-    print(v)
-    print("j: " + str(jsonify(v)))
     return jsonify(v)
 
 @app.route('/right', methods = ['GET', 'POST'])
@@ -257,24 +253,24 @@ def status():
 def shoot():
     return shoot_thing(1)
 
-def shoot_thing(t):
+def shoot_thing(shooter):
     global MSRV
-    v = MSRV.view(t)
+    v = MSRV.view(shooter)
     cno = 0   # cell number of "thing"
     hit = 0
     thing_id = ""
     for d in v:
-        if d[1][1] > t:
+        if d[1][1] > shooter:
             thing_id = str(d[1][1])
             hit = 1
             cno = cno
             MSRV.hit_thing(int(d[1][1]))
+            MSRV.thing[shooter].score += 1
             break
         cno += 1
     state = 1
+
     for player in MSRV.thing:
-        print("looking for a player.id: " + str(player.id) + ", thing_id: " + str(thing_id))
-        
         if str(player.id) == str(thing_id):
             print("found thing: " + str(thing_id))
             state = player.state
