@@ -15,6 +15,9 @@ from flask import jsonify
 import random
 import thing as THING
 
+import threading
+import time
+
 app = Flask(__name__)
 
 MSRV = None
@@ -100,7 +103,11 @@ class mazesvr:
         return
     
     def info( self, player ):
-        return ({'player_number':player, 'player_id':self.thing[player].id, 'direction': self.thing[player].direction, 'x':self.thing[player].x, 'y':self.thing[player].y, 'hits':self.thing[player].hits, 'score':self.thing[player].score})
+        global MSRV
+        
+        v = MSRV.view(player)
+        playerdata = {'player_number':player, 'player_id':self.thing[player].id, 'direction': self.thing[player].direction, 'x':self.thing[player].x, 'y':self.thing[player].y, 'hits':self.thing[player].hits, 'score':self.thing[player].score}
+        return jsonify((playerdata, v))
     
     def left( self, player ):
         self.thing[player].direction -= 1
@@ -208,7 +215,7 @@ def start():
 def info():
     global MSRV
     v = MSRV.info(1)
-    return jsonify(v)
+    return v
 
 @app.route('/display', methods=["POST"])
 def display():
@@ -254,6 +261,10 @@ def shoot():
     return shoot_thing(1)
 
 def shoot_thing(shooter):
+    r, v = thread_shoot(shooter)
+    return jsonify(r, v)
+
+def thread_shoot(shooter):
     global MSRV
     v = MSRV.view(shooter)
     cno = 0   # cell number of "thing"
@@ -278,7 +289,7 @@ def shoot_thing(shooter):
                 v = MSRV.view(1)
             break
     rtndata = {"hit": hit, "cell_number": cno, "id": thing_id, "state": state}
-    return jsonify(rtndata, v)
+    return rtndata, v
 
 @app.route('/heartbeat', methods=['POST'])
 def heartbeat():
@@ -317,7 +328,7 @@ def heartbeat():
             if thing.direction == WEST:
                 x -= 1
             if MSRV.m.halls[x][y] == 1:
-                shoot_thing(int(thing.id))
+                thread_shoot(int(thing.id))
                 shoot_flag = True
                 break
             elif MSRV.m.halls[x][y] != EMPTY:
@@ -374,6 +385,17 @@ def heartbeat():
 
     return "Ok"
 
+@app.before_first_request
+def activate_job():
+    def run_job():
+        while True:
+            time.sleep(2)
+            print("heartbeat")
+            heartbeat()
+            
+    thread = threading.Thread(target=run_job)
+    thread.start()
+    
 def main(argv=None):
     import sys
     import getopt
