@@ -242,8 +242,8 @@ def info():
     print("info dump")
     print(r.text)
     rtn_args = json.loads(r.text)
-    txt = "hits = " + str(rtn_args['hits']) + ', score = ' + str(rtn_args['score'])
-    msg = Label
+    show(rtn_args[1])
+    txt = "hits = " + str(rtn_args[0]['hits']) + ', score = ' + str(rtn_args[0]['score'])
     CAN.delete("tmp_txt")
     CAN.create_text(100,750,anchor='sw', text=txt, tag="tmp_txt")
     return
