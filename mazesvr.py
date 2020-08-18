@@ -11,6 +11,7 @@
 
 from flask import Flask
 from flask import jsonify
+from flask import request
 
 import random
 import thing as THING
@@ -38,18 +39,37 @@ class mazesvr:
     m = maze.Maze()
     thing = []
     LASTPLAYER = 0
-    NumOfPlayers = 7
+    NumOfPlayers = 4
 
     def __init__(self):
         global NORTH, EAST, SOUTH, WEST
 
         random.seed()
-        
+        '''
         for i in range(0, self.NumOfPlayers+1):
             self.thing.append( THING.Thing(1, 1, self.m.PLAYER, "Player"+str(i), "", NORTH, i) )
             self.m.halls[1][1] = 1
         self.LASTPLAYER = self.NumOfPlayers
         count = self.NumOfPlayers + 1
+        '''
+        
+        count = 0
+        self.thing.append( THING.Thing(0, 0, self.m.PLAYER, "PlayerZero", "", NORTH, count) )
+        count += 1
+        self.thing.append( THING.Thing(1, 1, self.m.PLAYER, "PlayerOne", "", NORTH, count) )
+        self.m.halls[1][1] = count
+        count += 1
+        self.thing.append( THING.Thing(3, 15, self.m.PLAYER, "PlayerTwo", "", EAST, count) )
+        self.m.halls[3][15] = count
+        count += 1
+        """
+        self.thing.append( THING.Thing(13, 1, self.m.PLAYER, "PlayerThree", "", NORTH, count) )
+        self.m.halls[13][1] = count
+        count += 1
+        self.thing.append( THING.Thing(15, 15, self.m.PLAYER, "PlayerFour", "", NORTH, count) )
+        self.m.halls[15][15] = count
+        count += 1
+        """
         self.thing.append(THING.Thing(1, 5, self.m.GREMLIN, "Gremlin 1", "", NORTH, count))
         self.m.halls[1][5] = count;
         count += 1
@@ -202,63 +222,71 @@ class mazesvr:
 print("before routes")              
 @app.route('/')
 def hw():
-    global MSRV
-    
+    global MSRV    
     return 'Hello World'
 
 @app.route('/start')
 def start():
     global MSRV
+    player = int(request.form['player'])
     return "start"
 
 @app.route('/info', methods=["POST"])
 def info():
     global MSRV
-    v = MSRV.info(1)
+    player = int(request.form['player'])
+    v = MSRV.info(player)
     return v
 
 @app.route('/display', methods=["POST"])
 def display():
     global MSRV
+    player = int(request.form['player'])
     v = MSRV.display()
     return "ok"
 
 @app.route('/left', methods=["GET","POST"])
 def left():
     global MSRV
-    MSRV.left(1)
-    v = MSRV.view(1)
+    player = int(request.form['player'])
+    MSRV.left(player)
+    v = MSRV.view(player)
     return jsonify(v)
 
 @app.route('/right', methods = ['GET', 'POST'])
 def right():
     global MSRV
-    MSRV.right(1)
-    v = MSRV.view(1)
+    player = int(request.form['player'])
+    MSRV.right(player)
+    v = MSRV.view(player)
     return jsonify(v)
 
 @app.route('/forward', methods=["GET","POST"])
 def forward():
     global MSRV
-    MSRV.forward(1)
-    v = MSRV.view(1)
+    player = int(request.form['player'])
+    MSRV.forward(player)
+    v = MSRV.view(player)
     return jsonify(v)
 
 @app.route('/back', methods=['POST'])
 def back():
     global MSRV
-    MSRV.back(1)
-    v = MSRV.view(1)
+    player = int(request.form['player'])
+    MSRV.back(player)
+    v = MSRV.view(player)
     return jsonify(v)
 
 @app.route('/status')
 def status():
     global MSRV
+    player = int(request.form['player'])
     return "status"
 
 @app.route('/shoot', methods=['POST'])
 def shoot():
-    return shoot_thing(1)
+    player = int(request.form['player'])
+    return shoot_thing(player)
 
 def shoot_thing(shooter):
     r, v = thread_shoot(shooter)

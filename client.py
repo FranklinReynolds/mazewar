@@ -5,8 +5,12 @@ import requests
 import re
 import json
 import time
+import sys
+import argparse
 
 root = Tk()
+
+PLAYER = 1   #default value
 
 # first, a row for start and stop buttons
 fram = Frame(root)
@@ -215,30 +219,31 @@ def show(v):
 
 def forward():
     #r = requests.post('http://localhost:5000/forward', data = {'key': 'value'})
-    r = requests.post('http://localhost:5000/forward')
+    r = requests.post('http://localhost:5000/forward', data = {'player': str(PLAYER)})
+    #r = requests.post('http://localhost:5000/forward')
     show(json.loads(r.text))
 
 def left():
     #r = requests.post('http://localhost:5000/forward', data = {'key': 'value'})
     print("left")
-    r = requests.post('http://localhost:5000/left')
+    r = requests.post('http://localhost:5000/left', data = {'player': str(PLAYER)})
     print(r.text)
     #show(r.text)
     show(json.loads(r.text))
 
 def right():
     print("right")
-    r = requests.post('http://localhost:5000/right')
+    r = requests.post('http://localhost:5000/right', data = {'player': str(PLAYER)})
     show(json.loads(r.text))
 
 def back():
     print("back")
-    r = requests.post('http://localhost:5000/back')
+    r = requests.post('http://localhost:5000/back', data = {'player': str(PLAYER)})
     show(json.loads(r.text))
     
 def info():
     global CAN
-    r = requests.post('http://localhost:5000/info')
+    r = requests.post('http://localhost:5000/info', data = {'player': str(PLAYER)})
     print("info dump")
     print(r.text)
     rtn_args = json.loads(r.text)
@@ -254,7 +259,7 @@ def ping():
     
 def display():
     print("display halls on the server")
-    r = requests.post('http://localhost:5000/display')
+    r = requests.post('http://localhost:5000/display', data = {'player': str(PLAYER)})
     
 def start():
     mazewar()
@@ -267,7 +272,7 @@ def clear():
 
 def shoot():
     print("shoot")
-    r = requests.post('http://localhost:5000/shoot')
+    r = requests.post('http://localhost:5000/shoot', data = {'player': str(PLAYER)})
     print(r.text)
     rtn_args = json.loads(r.text)
     if rtn_args[0]['hit'] == 1:
@@ -291,8 +296,15 @@ clearbutt.config(command=clear)
 do_mouse('Button-1')
 
 
+def cliparse(argv):
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-p', '--player', type=int, default=1, help=" n == player number (1..7)")
+    return parser.parse_args()
+
 def main():
-    global root
+    global root, PLAYER
+    args = cliparse(sys.argv[1:])
+    PLAYER = args.player
     root.after(1000, ping)
     root.mainloop()
 
