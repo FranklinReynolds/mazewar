@@ -13,6 +13,7 @@ from flask import Flask
 from flask import jsonify
 from flask import request
 
+import argparse
 import random
 import thing as THING
 
@@ -45,33 +46,15 @@ class mazesvr:
         global NORTH, EAST, SOUTH, WEST
 
         random.seed()
-        '''
-        for i in range(0, self.NumOfPlayers+1):
-            self.thing.append( THING.Thing(1, 1, self.m.PLAYER, "Player"+str(i), "", NORTH, i) )
-            self.m.halls[1][1] = 1
-        self.LASTPLAYER = self.NumOfPlayers
-        count = self.NumOfPlayers + 1
-        '''
-        
         count = 0
         self.thing.append( THING.Thing(0, 0, self.m.PLAYER, "PlayerZero", "", NORTH, count) )
         count += 1
         self.thing.append( THING.Thing(1, 1, self.m.PLAYER, "PlayerOne", "", NORTH, count) )
         self.m.halls[1][1] = count
         count += 1
-        #self.thing.append( THING.Thing(3, 15, self.m.PLAYER, "PlayerTwo", "", EAST, count) )
-        #self.m.halls[3][15] = count
         self.thing.append( THING.Thing(2, 1, self.m.PLAYER, "PlayerTwo", "", EAST, count) )
         self.m.halls[2][1] = count
         count += 1
-        """
-        self.thing.append( THING.Thing(13, 1, self.m.PLAYER, "PlayerThree", "", NORTH, count) )
-        self.m.halls[13][1] = count
-        count += 1
-        self.thing.append( THING.Thing(15, 15, self.m.PLAYER, "PlayerFour", "", NORTH, count) )
-        self.m.halls[15][15] = count
-        count += 1
-        """
         self.thing.append(THING.Thing(1, 5, self.m.GREMLIN, "Gremlin 1", "", NORTH, count))
         self.m.halls[1][5] = count;
         count += 1
@@ -199,7 +182,6 @@ class mazesvr:
         y = self.thing[player].y
         view = []
         cellnum = 0
-        # -1 == ROCK
         DONE = False
         while not DONE:
             # append LEFT, CENTER, RIGHT
@@ -417,22 +399,33 @@ def heartbeat():
 
 @app.before_first_request
 def activate_job():
+    global HEARTBEAT
+    
     def run_job():
         while True:
-            time.sleep(2)
+            time.sleep(HEARTBEAT)
             print("heartbeat")
             heartbeat()
             
+    if HEARTBEAT == 0:
+        return
     thread = threading.Thread(target=run_job)
     thread.start()
-    
+
+def cliparse(argv):
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-b', '--heartbeat', type=int, default=2, help=' n == seconds between heartbeats; 0 == no heartbeat')
+    return parser.parse_args()
+
 def main(argv=None):
     import sys
-    import getopt
-    global MSRV
+    global MSRV, HEARTBEAT
 
-    if argv is None:
-        argv = sys.argv
+    args = cliparse(sys.argv[:1])
+    HEARTBEAT = args.heartbeat
+    
+    #if argv is None:
+    #    argv = sys.argv
     MSRV = mazesvr()
     app.run(debug=False, host='0.0.0.0')
 
