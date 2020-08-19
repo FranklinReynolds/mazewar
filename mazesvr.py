@@ -59,8 +59,10 @@ class mazesvr:
         self.thing.append( THING.Thing(1, 1, self.m.PLAYER, "PlayerOne", "", NORTH, count) )
         self.m.halls[1][1] = count
         count += 1
-        self.thing.append( THING.Thing(3, 15, self.m.PLAYER, "PlayerTwo", "", EAST, count) )
-        self.m.halls[3][15] = count
+        #self.thing.append( THING.Thing(3, 15, self.m.PLAYER, "PlayerTwo", "", EAST, count) )
+        #self.m.halls[3][15] = count
+        self.thing.append( THING.Thing(2, 1, self.m.PLAYER, "PlayerTwo", "", EAST, count) )
+        self.m.halls[2][1] = count
         count += 1
         """
         self.thing.append( THING.Thing(13, 1, self.m.PLAYER, "PlayerThree", "", NORTH, count) )
