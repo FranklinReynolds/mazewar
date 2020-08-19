@@ -24,9 +24,12 @@ Dependencies:
 To Do:
 - refactor everything to make it less horrible	
 - back and side views of beholder
-- multiple player support
+- monsters should shoot players
+- html UI
 - start/stop
 - login/logout
+- network security
 - make port selection optional
 - add better wsgi component
 - clean up UI
+- add Docker 
