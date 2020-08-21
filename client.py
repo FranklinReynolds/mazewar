@@ -167,7 +167,7 @@ def show(v):
         # skip view[0] cuz that contains the player
         # and we only want to draw what is in front of the player
         l = view[num][1][0]
-        c = view[num][1][1]
+        c = int(view[num][1][1])
         r = view[num][1][2]
         cno = num
 

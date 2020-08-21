@@ -105,18 +105,18 @@ class Maze:
         for y in reversed(range(len(self.halls))):
             sys.stdout.write(" ")
             for x in range(len(self.halls[0])):
-                if self.halls[x][y] == 0 :
+                if int(self.halls[x][y]) == 0 :
                     sys.stdout.write("..")
-                if self.halls[x][y] == -1 :
+                elif int(self.halls[x][y]) == -1 :
                     sys.stdout.write("  ")
-                if self.halls[x][y] > 0 and self.halls[x][y] < 10 :
+                elif int(self.halls[x][y]) < 10:
                     sys.stdout.write(" " + str(self.halls[x][y]))
-                if self.halls[x][y] > 9 :
+                else:
                     sys.stdout.write(str(self.halls[x][y]))
             sys.stdout.write("\n")
 
     def set_loc(self, thing, x, y):
-        if halls[x][y] == 0:
+        if halls[x][y] == '0':
             halls[x][y] = thing
             return True
         return False
