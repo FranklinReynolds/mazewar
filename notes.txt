@@ -14,24 +14,42 @@ Since then, I have often thought MazeWar would be a great way to experiment with
 
 First, I needed a working MazeWar game. My previous versions are long gone but how hard could it be to create a new version? Besides, this way I could use Python or some other modern programming language. I could also build it using a client/server model to make some of planned UI experiments easier.
 
-Tools: Python and frameworks
+Tools: Picking a programming language
 
-I had been using Python for most of my programming projects for the last 6 or more years so I decided to use Python. I thought about picking a new language like Rust or an old language like Lisp. But eventually I decided to use Python for the first version. I figured I could experiment with different implementation languages in the future.
+I had been using Python for most of my programming projects, personal and professional, for the last 6 or more years so I decided to use Python to build Mazewar. I thought about picking a new language like Rust or an old language like Lisp. Rust is an increasingly popular alternative to C/C++ for systems programming. Perhaps it most important feature, memory safety, is often cited as the reason Rust has a reputation for being hard to learn. I have not used Lisp since the Mesozoic and I occasionally think about giving it another go. Usually what happens is I install one of the most popular lisps on my development machine (SBCL, Steel Bank Common Lisp, is installed on my current system), kick its tires and then forget about it. Eventually I decided my comfort using Python outweighed my interest in learning a new or relearning an old language. I figured I could experiment with different implementation languages in the future.
 
-I think Python's current popularity is interesting. Recently (I just googled this in Aug 2020), the Tiobe Index, PYPL, IEEE and RedMonk all list Python in the top three most popular languages. 10 years ago there was quite a bit comparison between Python and Ruby. I used Ruby for about a year and it was probably the most pleasant to use programming language I have ever tried. However, even then it seemed to me that Ruby was not enjoying the widespread adoption of Python. Certainly since then that has proved to be true.
+As an aside, I think Python's current extreme popularity is interesting. Recently (I just googled this in Aug 2020), the Tiobe Index, PYPL, IEEE and RedMonk all list Python in the top three most popular languages. 10 years ago there was quite a bit competition between Python and Ruby. They are similar languages, used for similar purposes, with similar advantages and disadvantages. I used Ruby for about a year and it was probably the most pleasant to use programming language I have ever tried. It was the most Lisp-like, non-Lisp I have ever used. However, even at that time it seemed to me that Ruby was losing ground to Python. Certainly since then that has proved to be true.
 
-Even though I once preferred Ruby, I am now very comfortable with Python. It is a reasonable language with decent documentation and wonderful libraries. On the other hand, I really don't like a few things about Python:
+I don't really know why Python has proved to be so much more popular/successful than Ruby.  Even though I still think Ruby is a better language, I am now very comfortable with Python. It is a reasonable language with decent documentation and wonderful libraries. On the other hand, Python has some really annoying features:
   - indentation to indicate code blocks (terrible choice responsible for more bugs than anything else I can think of)
   - crippled lambdas (Ruby blocks are dramatically better)
   - GIL (global interpreter lock)
-  - pdb (python debugger) still fails more often  than I would like
-However, none of these problems are so severe I avoid using Python (though sometimes when I run into the lastest indentation bug ...).
+  - pdb (python debugger) still fails more often than I would like
+However, none of these problems are so severe I avoid using Python (though sometimes when I run into my lastest indentation bug ...).
 
-One of Python's greatest strengths, its huge collection of excellent libraries can be confusing when trying to choose which library to use. There is a lot of libraries that provide similar but not identical features. Picking the ones best for your project can be a little frustrating. For this project I have chosen libraries I already have at least some experience using so that I spend most of my time creating my app rather than spending time learning how to use a cool, new library. In particular, I use TkInter for the GUI and Flask for the initial server. There are plenty of other GUI packages including PyGTK and PyQt but Tk (sometimes called TkInter) has been a key part of Python for a very long time. I find it easy to understand and it meets my needs.
+Python Libraries and Mazewar
+
+One of Python's greatest strengths, its huge collection of excellent libraries can be confusing when trying to choose which library to use. There is a lot of libraries that provide similar but not identical features. Picking the ones best for your project can be a little frustrating. For this project I have chosen libraries I already have at least some experience using so that I spend most of my time creating my app rather than spending time learning how to use a new, cool library. In particular, I use TkInter for the GUI and Flask for the initial server. There are plenty of other GUI packages including PyGTK and PyQt but Tk (sometimes called TkInter) has been a key part of Python for a very long time. I find it easy to understand and it meets my needs.
 
 There are more Web Frameworks for Python than ... well, there are a lot. Recently I had a lot of experience with Django and it overkill for my needs. I also had a fair amount of experience with Twisted but again, it did not seem like a good fit for this project. I had a little experience with Flask and it seemed like it was small and simple enough to be a good match. Frameworks like Pyramid or CherryPy look interesting but Flask seems to do the job perfectly well.
 
+My Mazewar client uses Requests to make HTTP requests. Requests is wonderful. It is simple and intuitive to use. There are very few libraries as good as Requests. Don't waste your time making HTTP requests using any other Python library.
+
 Initial Architecture
+
+Mazewar was always intended to be a multi-player, networked game. I decided from the beginning to build it as a client/server system with a central server and one or more clients.
+
+<pic>
+
+I choose HTTP as the request/response protocol with the idea that I might eventually build a web client. HTTP is a spectacularly inefficient protocol, but it is simple to use and my version of Mazewar does not need to use an efficient protocol.
+
+In order to get real-time or close to real-time updates for the client, the client polls the server once per second. A better or at least more efficient solution would probably be to use websockets. One advantage to the current HTTP only solution is simplicity of implementation and deployment. The primary deployment issue is firewall traversal. The plan is for the server to use https and to have an option to choose the port. There should not be a problem with the overwhelming majority of firewalls if the default TLS/HTTPS port is used. If a different port must be used, the server's firewall might need to be configured to allow incoming https connections on the port.
+
+On the other hand, Websocket support is wide spread and it should be more efficient than client based, https polling. All major browsers support websockets and multiple websocket libraries for Python. The firewall issue would be a minor detail for most home users. It is on my future ToDo list.
+
+I wanted the Gremlins/Monsters to act autonomously and I wanted to be able to experiment with different Gremlin behaviors (algorithms). Eventually I decided to keep the first version simple. I used a Flask trick and a separate thread in the server to implement a periodic "heartbeat". With each heartbeat, each Gremlin decides whether to shoot, turn or move forward (currently, gremlins never move backwards). The frequency of the heartbeat can be set when the server is launched.
+
+I experimented with using a separate process instead of a separate thread. The idea was to have the separate process execute in a loop and periodically invoke a "heartbeat" method. That worked but whatever benefits came from avoiding a separate thread in the server did not seem to be worth the trouble of running a separate process.
 
 
 ================================================
@@ -51,6 +69,7 @@ l != wall and c != wall            # intersection from left
   draw short horizontal wall;
   if prev l == wall
      draw prev l ending edge
+
 
 c == wall
   draw center box
