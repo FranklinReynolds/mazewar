@@ -22,14 +22,17 @@ Dependencies:
      json
 
 To Do:
-- refactor everything to make it less horrible	
-- back and side views of beholder
-- monsters should shoot players
-- html UI
+- add Docker
+- back and side views of beholder and player
 - start/stop
 - login/logout
+- user identities, scores, etc. in an sqlite db
 - network security
 - make port selection optional
+- websockets for client updates instead of polling...
 - add better wsgi component
-- clean up UI
-- add Docker 
+- 2d bird's eye view
+- html UI
+- multiple servers with magic doors connecting each maze
+- ai strategies for players and monsters
+- implement in different languages (rust, lisp, ...)
